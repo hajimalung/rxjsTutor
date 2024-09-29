@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { from, fromEvent, Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-rxjs-learning',
@@ -8,7 +8,7 @@ import { Observable, of } from 'rxjs';
   templateUrl: './rxjs-learning.component.html',
   styleUrl: './rxjs-learning.component.scss'
 })
-export class RxjsLearningComponent implements OnInit {
+export class RxjsLearningComponent implements OnInit, AfterViewInit {
   agents! : Observable<string>;
   agentName! : string;
 
@@ -18,6 +18,16 @@ export class RxjsLearningComponent implements OnInit {
   stdObj = { name : "John", age:12 }
   // industry best practice end observable name with $ sign
   stdObjObs$ : Observable<any> = of(this.stdObj);
+
+  // using from operator array observable
+  orders$ : Observable<string> = from(['order1','order2','order3','order4']);
+
+  // from can also be used to create observable from other observable
+  oredersFromStudents$ : Observable<string[]> = from(this.students);
+
+  @ViewChild('validate') validateBtn! : ElementRef;
+
+  btnClickObservable$! :Observable<any>;
 
   constructor(){}
 
@@ -44,12 +54,41 @@ export class RxjsLearningComponent implements OnInit {
 
 
       // subscribing to observalbe created using of operator
-      this.students.subscribe(data=>console.log(data));
+      this.students.subscribe(data=>{
+        // of array operator emiits entire array at once as data
+        console.log("in sub of 'of' array operator");
+        console.log(data)
+      });
 
       // subscribing to object based observable created usin of operator
       this.stdObjObs$.subscribe(data=>console.log(data));
 
+      //subbing to orders
+      this.orders$.subscribe(data=>{
+        // each item of array emitted as seperate data
+        console.log("in sub of from array operator!!")
+        console.log(data)
+      });
+
+      this.oredersFromStudents$.subscribe(data=>{
+        console.log("in sub of from observale operator!!")
+        console.log(data);
+      })
+
 
   }
+
+  ngAfterViewInit(): void {
+    // binding observable with btn click event
+    this.btnClickObservable$ = fromEvent(this.validateBtn?.nativeElement,'click');
+
+    this.btnClickObservable$.subscribe(data=>{
+      console.log("this is from the btn click event observable!!!!");
+    })
+  }
+
+    rxjsObservable() {
+        console.log('thi is from btn click event!!');
+    }
 
 }
